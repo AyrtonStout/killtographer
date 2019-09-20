@@ -1,0 +1,33 @@
+#viewed-map {
+  background-repeat: no-repeat;
+  width: 1002px;
+  height: 668px;
+
+  #map-svg {
+    position: relative;
+    z-index: 10;
+  }
+
+  path:hover {
+    visibility: initial;
+    opacity: 0.2;
+  }
+  path {
+    fill: white;
+    pointer-events: all;
+    visibility: hidden;
+
+    -webkit-filter: blur(18px);
+    filter: blur(5px);
+  }
+
+  .kill-location {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: red;
+    border: 1px solid black;
+  }
+
+}

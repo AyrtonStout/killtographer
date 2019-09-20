@@ -113,11 +113,15 @@ function module:getPetOwner(petName)
 end
 
 function module:getPlayerData(playerGUID)
+    if (playerGUID == nil) then
+        return nil
+    end
+
     local _, className, _, raceName, gender = GetPlayerInfoByGUID(playerGUID)
 
     return {
-        className = classToId[className],
-        raceName = raceToId[raceName],
+        class = classToId[className],
+        race = raceToId[raceName],
         gender = gender
     }
 end
@@ -152,7 +156,6 @@ function module:getSourceCoordinates(mapId)
         local position = C_Map.GetPlayerMapPosition(currentMapId, "player")
         -- Though rare, I have seen this happen when I hearthed
         if (position == nil) then
-            print('Failed to get coordinates for the kill')
             return false
         end
 

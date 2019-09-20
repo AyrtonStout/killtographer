@@ -66,7 +66,7 @@ function module:cleanUpLevelData()
     local currentTime = math.floor(GetTime())
 
     for guid, data in pairs(guidToLevel) do
-        if (currentTime - data['time'] > 60) then
+        if (currentTime - data['time'] > 300) then
             guidToLevel[guid] = nil
         end
     end

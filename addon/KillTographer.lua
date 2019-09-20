@@ -59,9 +59,15 @@ local function onCombatLogEvent(_, _, ...)
         return
     end
 
-    local petOwner
+    local killerPetOwner
+    local victimPetOwner
+
     if (module:isPet(sourceGUID)) then
-        petOwner = module:getPetOwner(sourceName)
+        killerPetOwner = module:getPetOwner(sourceName)
+    end
+
+    if (module:isPet(destGUID)) then
+        victimPetOwner = module:getPetOwner(destName)
     end
 
     local epochSeconds = math.floor(timestamp)
@@ -81,26 +87,38 @@ local function onCombatLogEvent(_, _, ...)
         killerType = environmentEvent and 42 or module:objectTypeFromGUID(sourceGUID),
         killerId = sourceGUID,
         killerLevel = environmentEvent and 0 or module:getLevel(sourceGUID, sourceName),
+        killerPetOwner = killerPetOwner,
         victimType = module:objectTypeFromGUID(destGUID),
         victimName = destName,
         victimId = destGUID,
         victimLevel = module:getLevel(destGUID, destName),
+        victimPetOwner = victimPetOwner,
         killSource = damageSource,
-        petOwner = petOwner,
         mapId = mapId,
         isInstance = isInstance,
         sourcePlayer = UnitName("player"),
         sourceLevel = UnitLevel("player"),
-        realmName = GetRealmName()
+        realm = GetRealmName()
     }
 
     if (module:isPlayer(sourceGUID)) then
-        killEntry['killerPlayerData'] = module:getPlayerData(sourceGUID, sourceName)
+        killEntry['killerPlayerData'] = module:getPlayerData(sourceGUID)
     end
 
     if (module:isPlayer(destGUID)) then
-        killEntry['victimPlayerData'] = module:getPlayerData(destGUID, destName)
+        killEntry['victimPlayerData'] = module:getPlayerData(destGUID)
     end
+
+    if (killerPetOwner ~= nil) then
+        -- UnitGUID doesn't work on a name if they aren't in the party. So this will often return nil
+        killEntry['killerPetOwnerPlayerData'] = module:getPlayerData(UnitGUID(killerPetOwner))
+    end
+
+    if (victimPetOwner ~= nil) then
+        killEntry['victimPetOwnerPlayerData'] = module:getPlayerData(UnitGUID(victimPetOwner))
+    end
+
+    killEntry['sourcePlayerData'] = module:getPlayerData(UnitGUID("player"))
 
     if (not isInstance) then
         local coordinates = module:getSourceCoordinates(mapId)
@@ -170,8 +188,8 @@ function writeEvent(victimGUID)
         return
     end
 
-    if (NewDataPoints == nil) then
-        NewDataPoints = {}
+    if (NewDataPoints3 == nil) then
+        NewDataPoints3 = {}
     end
 
     if (killerLevel == nil) then
@@ -180,9 +198,5 @@ function writeEvent(victimGUID)
 
     -- print('Level ' .. victimLevel .. ' ' .. victimName ..' Killed by level ' .. killerLevel .. ' ' .. killerName .. ' using: ' .. killEntry['killSource'])
 
-    -- Don't need these for the purposes of external record keeping. Just needed them for internal use
-    killEntry['victimId'] = nil
-    killEntry['killerId'] = nil
-
-    table.insert(NewDataPoints, killEntry)
+    table.insert(NewDataPoints3, killEntry)
 end
