@@ -61,7 +61,7 @@ def get_entity_ids(new_events, realm_name_to_id):
                 'name': event['killerPetOwner'],
                 'entityType': PLAYER_TYPE,
                 'petOwner': None,
-                'additionalData': event['killerPetOwnerPlayerData'],
+                'additionalData': event.get('killerPetOwnerPlayerData', None),
                 'realm': event['realm']
             })
             entities.add(input_entity)
@@ -71,7 +71,7 @@ def get_entity_ids(new_events, realm_name_to_id):
                 'name': event['victimPetOwner'],
                 'entityType': PLAYER_TYPE,
                 'petOwner': None,
-                'additionalData': event['victimPetOwnerPlayerData'],
+                'additionalData': event.get('victimPetOwnerPlayerData', None),
                 'realm': event['realm']
             })
             entities.add(input_entity)
