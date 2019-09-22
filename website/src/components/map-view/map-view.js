@@ -27,11 +27,18 @@ export class MapView extends React.Component {
 						return <path key={i} d={mapLink.coordinates} onClick={() => this.props.loadMap(mapLink.goesTo)}/>
 					})}
 				</svg>
-				<div id="kill-location-container">
+				<div id="kill-location-container" className="location-container">
 					{ this.props.killEvents.map((killEvent, i) => {
 						const x = killEvent.x * 100 + '%';
 						const y = killEvent.y * 100 + '%';
-						return <div key={i} className="kill-location" style={{ left: x, top: y}}/>
+						return <div key={i} className="kill-location event-location" style={{ left: x, top: y}}/>
+					})}
+				</div>
+				<div id="position-location-container" className="location-container">
+					{ this.props.positionEvents.map((positionEvent, i) => {
+						const x = positionEvent.x * 100 + '%';
+						const y = positionEvent.y * 100 + '%';
+						return <div key={i} className="position-location event-location" style={{ left: x, top: y}}/>
 					})}
 				</div>
 			</div>

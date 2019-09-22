@@ -1,7 +1,6 @@
 from database import query_many, query_many_params, execute_update_params, query_first_row
 
-def read_events(map_id, is_instance, source_player_id):
-    print source_player_id
+def read_kill_events(map_id, is_instance, source_player_id):
     source_filter = ""
     args = { 'zone_id': map_id }
 
@@ -30,6 +29,24 @@ def read_events(map_id, is_instance, source_player_id):
                 ON ke.victim_id = ge2.id
               WHERE ec.zone_id = :zone_id
               {}
+         """.format(source_filter), args)
+
+
+def read_position_events(map_id, source_player_id):
+    source_filter = ""
+    args = { 'zone_id': map_id }
+
+    if source_player_id is not None:
+        args['source_player_id'] = source_player_id
+        source_filter = "AND source_player_id = :source_player_id"
+
+    return query_many_params("""
+        SELECT *
+        FROM position_coordinates pc 
+        LEFT JOIN position_event pe 
+          ON pc.event_id = pe.id
+        WHERE pc.zone_id = :zone_id
+         {}
          """.format(source_filter), args)
 
 

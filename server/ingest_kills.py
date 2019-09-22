@@ -5,10 +5,10 @@ from entity import InputEntity
 from database import query_many, execute_update_params, query_first_row
 import hashlib
 
-PLAYER_TYPE = 1
-PET_TYPE = 3
+from ingest_common import get_realm_ids, PLAYER_TYPE, PET_TYPE
 
-def ingest_events(events):
+
+def ingest_kill_data(events):
     # Despite us explicitly having "ignore' in our queries, MySQL thinks we want warnings for inserting duplicate rows
     # Suppress this because it's stupid and we don't care
     with warnings.catch_warnings():
@@ -16,30 +16,12 @@ def ingest_events(events):
 
         realm_ids = get_realm_ids(events)
         kill_source_ids = get_kill_source_ids(events)
-        get_entity_ids(events, realm_ids)
+        create_entities(events, realm_ids)
 
         enter_events(events, realm_ids, kill_source_ids)
 
 
-def get_realm_ids(new_events):
-    realm_names = set()  # Remove duplicates
-    for event in new_events:
-        realm_names.add(event['realm'])
-
-    # Make sure new there is an entry for all of our stuff
-    for name in realm_names:
-        execute_update_params("INSERT IGNORE INTO realm (`name`) VALUES (:name)", {'name': name})
-
-    # Now that we know that there are records, grab them out and hold them in memory
-    realm_name_and_id = query_many("SELECT id, name FROM realm")
-    realm_name_to_id = {}
-    for entry in realm_name_and_id:
-        realm_name_to_id[entry['name']] = entry['id']
-
-    return realm_name_to_id
-
-
-def get_entity_ids(new_events, realm_name_to_id):
+def create_entities(new_events, realm_name_to_id):
     entities = set()  # Remove duplicates
 
     # Each event has up to 5 entities. Source (player that is playing), killer, victim, and a possible pet owner if the victim or killer was a pet

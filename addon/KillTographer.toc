@@ -1,9 +1,10 @@
 ## Interface: 11302
 ## Title: KillTographer
 ## Author: Route13
-## Version: 1.2
-## SavedVariables: NewDataPoints3
+## Version: 1.3
+## SavedVariables: NewDataPoints3, NewPositionPoints
 
 KillTographerHelper.lua
 LevelCapture.lua
+PositionTracker.lua
 KillTographer.lua

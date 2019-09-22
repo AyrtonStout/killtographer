@@ -17,12 +17,14 @@ export class SiteWrapper extends React.Component {
 			previousMapIds: [],
 			killEvents: [],
 			realms: [],
-			selectedRealm: {}
+			selectedRealm: {},
+			positionEvents: []
 		}
 	}
 
 	componentDidMount() {
 		this.fetchKillEvents(this.state.mapId);
+		this.fetchPositionEvents(this.state.mapId);
 		this.fetchSourcePlayers();
 		this.fetchRealms();
 	}
@@ -71,13 +73,29 @@ export class SiteWrapper extends React.Component {
 		Api.get('kill-events', params).then(res => this.setState({ killEvents: res }) );
 	}
 
+	fetchPositionEvents(mapId) {
+		const params = { mapId: mapId };
+
+		if (this.state.sourcePlayerId != null) {
+			params.sourcePlayerId = this.state.selectedSourcePlayer.id
+		}
+
+		Api.get('position-events', params).then(res => this.setState({ positionEvents: res }) );
+	}
+
 	loadMap(mapId) {
 		const previousMapIds = this.state.previousMapIds.slice(0);
 		previousMapIds.push(this.state.mapId);
 
-		this.setState({ mapId, previousMapIds, killEvents: [] });
+		this.setState({
+			mapId,
+			previousMapIds,
+			killEvents: [],
+			positionEvents: []
+		});
 
 		this.fetchKillEvents(mapId);
+		this.fetchPositionEvents(mapId);
 	}
 
 	undoMapLoad() {
@@ -90,6 +108,7 @@ export class SiteWrapper extends React.Component {
 
     this.setState({ mapId: lastMapId, previousMapIds, killEvents: [] });
 		this.fetchKillEvents(lastMapId);
+		this.fetchPositionEvents(lastMapId);
 	}
 
 	render() {
@@ -107,6 +126,7 @@ export class SiteWrapper extends React.Component {
 					loadMap={this.loadMap.bind(this)}
 					undoMapLoad={this.undoMapLoad.bind(this)}
 					killEvents={this.state.killEvents}
+					positionEvents={this.state.positionEvents}
 				/>
 				<KillFeed killEvents={this.state.killEvents}/>
 			</div>

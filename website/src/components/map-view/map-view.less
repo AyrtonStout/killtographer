@@ -1,7 +1,15 @@
 #viewed-map {
+  position: relative;
   background-repeat: no-repeat;
   width: 1002px;
   height: 668px;
+
+  .location-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+  }
 
   #map-svg {
     position: relative;
@@ -21,13 +29,18 @@
     filter: blur(5px);
   }
 
-  .kill-location {
+  .event-location {
     position: absolute;
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background-color: red;
     border: 1px solid black;
   }
 
+  .kill-location {
+    background-color: red;
+  }
+  .position-location {
+    background-color: blue;
+  }
 }
