@@ -12,7 +12,7 @@ def init_db(app):
 
         cfg_parser = RawConfigParser()
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(curr_dir + '/config.ini.bak', 'r+') as config:
+        with open(curr_dir + '/config.ini', 'r+') as config:
             cfg_parser.readfp(config)
         mysql_url = cfg_parser.get('mysql', 'URL')
         mysql_port = cfg_parser.get('mysql', 'PORT')
