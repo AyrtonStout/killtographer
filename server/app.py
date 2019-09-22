@@ -14,6 +14,7 @@ from ingest_kills import ingest_kill_data
 from ingest_position import ingest_position_data
 
 app = Flask(__name__, static_folder='../website', static_url_path='')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 init_db(app)
 db.init_app(app)
