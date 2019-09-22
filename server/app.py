@@ -1,17 +1,17 @@
-from flask import Flask, make_response, jsonify, request
+import re
+
+from flask import Flask, jsonify, request
+from slpp import slpp as lua
 
 from data_read import read_kill_events, read_event_count, read_sources, read_realms, read_position_events
-from database import db, init_db, query_many, execute_update, execute_update_params, query_first_row
-from slpp import slpp as lua
-import re
+from database import db, init_db
+from ingest_kills import ingest_kill_data
+from ingest_position import ingest_position_data
 
 # Uncomment for SQL Logging
 # import logging
 # logging.basicConfig()
 # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-from ingest_kills import ingest_kill_data
-from ingest_position import ingest_position_data
 
 app = Flask(__name__, static_folder='../website', static_url_path='')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,18 +25,20 @@ def get_kill_events():
     map_id = request.args.get('mapId')
     is_instance = request.args.get('isInstance')
     source_player_id = request.args.get('sourcePlayerId')
+    event_limit = int(request.args.get('eventLimit'))
 
     is_instance = True if is_instance == 'true' else False
 
-    return jsonify(read_kill_events(map_id, is_instance, source_player_id))
+    return jsonify(read_kill_events(map_id, is_instance, source_player_id, event_limit))
 
 
 @app.route('/api/position-events')
 def get_position_events():
     map_id = request.args.get('mapId')
     source_player_id = request.args.get('sourcePlayerId')
+    event_limit = int(request.args.get('eventLimit'))
 
-    return jsonify(read_position_events(map_id, source_player_id))
+    return jsonify(read_position_events(map_id, source_player_id, event_limit))
 
 
 @app.route('/api/sources')
@@ -81,14 +83,20 @@ def add_event():
         kill_events = lua.decode(parts[kill_events_index])
         position_events = lua.decode(parts[position_events_index])
 
-        ingest_kill_data(kill_events)
-        ingest_position_data(position_events)
+        if kill_events is not None:
+            ingest_kill_data(kill_events)
+        if position_events is not None:
+            ingest_position_data(position_events)
 
     if len(parts) == 2:
         if first_table_name == kills_table_name:
-            ingest_kill_data(lua.decode(parts[1]))
+            kill_data = lua.decode(parts[1])
+            if kill_data is not None:
+                ingest_kill_data(kill_data)
         else:
-            ingest_position_data(lua.decode(parts[1]))
+            position_data = lua.decode(parts[1])
+            if position_data is not None:
+                ingest_position_data(position_data)
 
     return '', 200
 
@@ -102,4 +110,4 @@ def row2dict(row):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5001)

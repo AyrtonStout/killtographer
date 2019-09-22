@@ -3,7 +3,7 @@ import {Slide, ToastContainer} from "react-toastify";
 import {Api} from "../../services/api";
 import {MapView} from "../map-view/map-view";
 import {KillFeed} from "../kill-feed/kill-feed";
-import {SourceSelect} from "../source-select/source-select";
+import {QuerySelect} from "../source-select/query-select";
 
 export class SiteWrapper extends React.Component {
 	constructor(props) {
@@ -18,7 +18,9 @@ export class SiteWrapper extends React.Component {
 			killEvents: [],
 			realms: [],
 			selectedRealm: {},
-			positionEvents: []
+			positionEvents: [],
+			killEventLimit: 200,
+			positionEventLimit: 500,
 		}
 	}
 
@@ -29,7 +31,17 @@ export class SiteWrapper extends React.Component {
 		this.fetchRealms();
 	}
 
-	fetchSourcePlayers() {
+	componentDidUpdate(prevProps, prevState, snapshot) {
+			if (this.state.killEventLimit !== prevState.killEventLimit) {
+				this.fetchKillEvents(this.state.mapId);
+			} else if (this.state.positionEventLimit !== prevState.positionEventLimit) {
+				this.fetchPositionEvents(this.state.mapId);
+			} else if (this.state.selectedRealm.id !== prevState.selectedRealm.id) {
+				this.fetchSourcePlayers(this.state.selectedRealm);
+			}
+	}
+
+	fetchSourcePlayers(selectedRealm) {
 		Api.get('sources').then(res => this.setState({ sourcePlayers: res }) );
 		Api.get('sources/event-count').then(res => {
 			const playerIdToEventCount = {};
@@ -64,21 +76,29 @@ export class SiteWrapper extends React.Component {
 		const params = {
 			mapId: mapId,
 			isInstance: false,
+			eventLimit: this.state.killEventLimit
 		};
 
 		if (this.state.sourcePlayerId != null) {
 			params.sourcePlayerId = this.state.selectedSourcePlayer.id
 		}
 
+		this.setState({ killEvents: [] });
+
 		Api.get('kill-events', params).then(res => this.setState({ killEvents: res }) );
 	}
 
 	fetchPositionEvents(mapId) {
-		const params = { mapId: mapId };
+		const params = {
+			mapId: mapId,
+			eventLimit: this.state.positionEventLimit
+		};
 
 		if (this.state.sourcePlayerId != null) {
 			params.sourcePlayerId = this.state.selectedSourcePlayer.id
 		}
+
+		this.setState({ positionEvents: [] });
 
 		Api.get('position-events', params).then(res => this.setState({ positionEvents: res }) );
 	}
@@ -87,12 +107,7 @@ export class SiteWrapper extends React.Component {
 		const previousMapIds = this.state.previousMapIds.slice(0);
 		previousMapIds.push(this.state.mapId);
 
-		this.setState({
-			mapId,
-			previousMapIds,
-			killEvents: [],
-			positionEvents: []
-		});
+		this.setState({ mapId, previousMapIds });
 
 		this.fetchKillEvents(mapId);
 		this.fetchPositionEvents(mapId);
@@ -111,15 +126,23 @@ export class SiteWrapper extends React.Component {
 		this.fetchPositionEvents(lastMapId);
 	}
 
+	updateState(stateChange) {
+		console.log(stateChange);
+
+		this.setState(stateChange)
+
+	}
+
 	render() {
 		return (
 			<div id="site-wrapper">
 				<ToastContainer autoClose={5000} hideProgressBar={true} transition={Slide}/>
-				<SourceSelect
+				<QuerySelect
 					sourcePlayers={this.state.sourcePlayers}
 					sourcePlayerEventCount={this.state.sourcePlayerEventCount}
 					realms={this.state.realms}
 					selectedRealm={this.state.selectedRealm}
+					updateState={this.updateState.bind(this)}
 				/>
 				<MapView
 					mapId={this.state.mapId}

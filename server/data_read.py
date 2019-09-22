@@ -1,8 +1,11 @@
 from database import query_many, query_many_params, execute_update_params, query_first_row
 
-def read_kill_events(map_id, is_instance, source_player_id):
+def read_kill_events(map_id, is_instance, source_player_id, event_limit):
     source_filter = ""
-    args = { 'zone_id': map_id }
+    args = {
+        'zone_id': map_id,
+        'limit': event_limit
+    }
 
     if source_player_id is not None:
         args['source_player_id'] = source_player_id
@@ -14,6 +17,8 @@ def read_kill_events(map_id, is_instance, source_player_id):
              FROM kill_event
              WHERE zone_id = :zone_id
              {}
+             ORDER BY ke.event_time DESC
+             LIMIT :limit
         """.format(source_filter), args)
     else:
         return query_many_params("""
@@ -29,12 +34,17 @@ def read_kill_events(map_id, is_instance, source_player_id):
                 ON ke.victim_id = ge2.id
               WHERE ec.zone_id = :zone_id
               {}
+              ORDER BY ke.event_time DESC
+              LIMIT :limit
          """.format(source_filter), args)
 
 
-def read_position_events(map_id, source_player_id):
+def read_position_events(map_id, source_player_id, event_limit):
     source_filter = ""
-    args = { 'zone_id': map_id }
+    args = {
+        'zone_id': map_id,
+        'limit': event_limit
+    }
 
     if source_player_id is not None:
         args['source_player_id'] = source_player_id
@@ -46,8 +56,10 @@ def read_position_events(map_id, source_player_id):
         LEFT JOIN position_event pe 
           ON pc.event_id = pe.id
         WHERE pc.zone_id = :zone_id
-         {}
-         """.format(source_filter), args)
+        {}
+        ORDER BY pe.event_time DESC
+        LIMIT :limit
+        """.format(source_filter), args)
 
 
 def read_sources(realm_id):
