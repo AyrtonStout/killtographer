@@ -21,6 +21,8 @@ export class SiteWrapper extends React.Component {
 			positionEvents: [],
 			killEventLimit: 200,
 			positionEventLimit: 500,
+			killsVisible: true,
+			positionsVisible: true
 		}
 	}
 
@@ -127,10 +129,7 @@ export class SiteWrapper extends React.Component {
 	}
 
 	updateState(stateChange) {
-		console.log(stateChange);
-
 		this.setState(stateChange)
-
 	}
 
 	render() {
@@ -143,6 +142,8 @@ export class SiteWrapper extends React.Component {
 					realms={this.state.realms}
 					selectedRealm={this.state.selectedRealm}
 					updateState={this.updateState.bind(this)}
+					killsVisible={this.state.killsVisible}
+					positionsVisible={this.state.positionsVisible}
 				/>
 				<MapView
 					mapId={this.state.mapId}
@@ -150,6 +151,8 @@ export class SiteWrapper extends React.Component {
 					undoMapLoad={this.undoMapLoad.bind(this)}
 					killEvents={this.state.killEvents}
 					positionEvents={this.state.positionEvents}
+					killsVisible={this.state.killsVisible}
+					positionsVisible={this.state.positionsVisible}
 				/>
 				<KillFeed killEvents={this.state.killEvents}/>
 			</div>

@@ -72,6 +72,24 @@ export class QuerySelect extends React.Component {
 						}) }
 					</select>
 				</div>
+
+        <div>
+					<span>Show Kill Events</span>
+					<input
+						type="checkbox"
+						checked={this.props.killsVisible}
+						onChange={() => this.props.updateState({ killsVisible: !this.props.killsVisible })}
+					/>
+				</div>
+
+				<div>
+					<span>Show Position Events</span>
+					<input
+						type="checkbox"
+						checked={this.props.positionsVisible}
+						onChange={() => this.props.updateState({ positionsVisible: !this.props.positionsVisible })}
+					/>
+				</div>
 			</div>
 		)
 	}
