@@ -1,7 +1,20 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
 const http = require('http');
+const { getWoWInstallLocation } = require("./helper");
+const { hideCurrentProcessWindow } = require('windows-api-show-window');
 
+
+if (__dirname === 'Startup') {
+  // hideCurrentProcessWindow();
+} else {
+  console.info('-- WoW Stat Uploader --');
+  console.info('');
+  console.info('This application is not running from within your Windows startup folder');
+  console.info('It is recommended to copy it to "C:\\Users\\{user}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup" so that the script is running in the background');
+  console.info('');
+  console.info('However, it will continue to run manually until this window is closed');
+}
 
 function runStuff() {
   console.log('Checking to send... ');
@@ -10,37 +23,10 @@ function runStuff() {
     return;
   }
 
-  const installLocation = getInstallLocation();
+  const installLocation = getWoWInstallLocation();
   readAndSendSavedVariables(installLocation);
 
-  console.log('Done running');
-}
-
-function getInstallLocation() {
-  const regKeyResult = execSync('reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Blizzard Entertainment\\World of Warcraft" /v InstallPath', { encoding: 'utf8' });
-
-  const installKey =  regKeyResult.split('\n').find(regText => regText.includes('InstallPath'));
-
-  if (installKey === undefined) {
-    console.error('Unable to locate WoW installation directory!');
-    return
-  }
-
-// const [key, keyType, keyValue] = installKey
-  const installLocation = installKey
-    .split(' ') // String has 3 components: key, key type, and key value. They are separated by like 4 spaces
-    .filter(part => part.length > 0) // Get rid of all the empty entries that were created b/c of the 4 space separators
-    .slice(2) // We don't want the key or key type
-    .join(' ') // The remaining entries are all for the location. Put them back together (there were probably spaces in the directory name)
-    .replace(/\\/g, '/') // Get rid of the \ and use / for less escaping
-    .replace(/\r/g, '') // Get rid of carriage returns
-  ;
-
-  if (!installLocation.includes('_classic_')) {
-    throw 'Could not find WoW Classic location from registry key!';
-  }
-
-  return installLocation;
+  console.log('Done running. Will check again in 10 minutes');
 }
 
 function postTheData(data, filePath) {
@@ -66,7 +52,6 @@ function postTheData(data, filePath) {
   // };
 
   const request = http.request(options, res => {
-    console.log(res.statusCode);
     if (res.statusCode === 200) {
       console.log('Deleting file...');
       fs.unlinkSync(filePath);
@@ -113,4 +98,5 @@ function isWowRunning() {
   return tasks.includes(processName);
 }
 
+runStuff();
 setInterval(runStuff, 10 * 60 * 1000);

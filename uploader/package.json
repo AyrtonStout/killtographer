@@ -1,0 +1,15 @@
+{
+  "name": "uploader",
+  "version": "1.0.0",
+  "description": "Installs and runs KillTographer",
+  "main": "uploader.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^8.1.0",
+    "windows-api-show-window": "^0.1.2"
+  }
+}

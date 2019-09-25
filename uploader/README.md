@@ -1,3 +1,4 @@
-npm install -g pkg
+npm install -g nexe
 
-pkg uploader.js --targets node8-win-x64
+nexe install.js
+nexe uploader.js
