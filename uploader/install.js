@@ -3,7 +3,8 @@ const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 });
-const { getWoWInstallLocation, getHomeDirectoryLocation, deleteFolderRecursive } = require("./helper");
+const { getWoWInstallLocation, getHomeDirectoryLocation } = require("./helper");
+const { spawn } = require('child_process');
 
 const startupDir = getHomeDirectoryLocation() + '/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup';
 const addonLocation = getWoWInstallLocation() + 'Interface/AddOns/';
@@ -33,7 +34,7 @@ readline.question('Do you wish to proceed? (y/n)\n', input => {
 });
 
 function install() {
-  console.info('Work work...');
+  console.info('\nWork work...\n');
 
   const killTographerDir = addonLocation + 'KillTographer';
   console.info('Checking if a previous KillTographer installation exists');
@@ -60,11 +61,25 @@ function install() {
   fs.copySync('KillTographer', killTographerDir);
 
   console.info('Creating startup script');
-  fs.writeFileSync(startupDir + '/' + startupFileName, execString);
+  const startupFile = `${startupDir}/${startupFileName}`;
 
-  console.info("Job's done!");
+  fs.writeFileSync(startupFile, execString);
 
-  readline.question('KillTographer installation was successful. Press enter to exit', () => {
-    process.exit(0);
+  console.info("\nJob's done!\n");
+
+  readline.question('KillTographer installation was successful. Would you like to start the KillTographer background process now? (y/n)', input => {
+    const answer = input.toLowerCase();
+    if (answer === 'y' || answer === 'yes') {
+      const killTographerProcess = spawn(startupFile, { detached: true });
+      killTographerProcess.unref();
+
+      readline.question('KillTographer has been started. Press enter to exit', () => {
+        process.exit(0);
+      })
+    } else {
+      readline.question('KillTographer not started. Press enter to exit', () => {
+        process.exit(0);
+      })
+    }
   })
 }
