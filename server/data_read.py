@@ -69,7 +69,7 @@ def read_sources(realm_id):
 def read_event_count():
     return query_many("""SELECT source_player_id, count(*) as count FROM kill_event WHERE source_player_id IN (
                       SELECT id FROM game_entity WHERE source_player = TRUE
-                      )""")
+                      ) GROUP BY source_player_id""")
 
 
 def read_realms():

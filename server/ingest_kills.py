@@ -15,8 +15,9 @@ def ingest_kill_data(events):
         warnings.simplefilter("ignore")
 
         realm_ids = get_realm_ids(events)
-        kill_source_ids = get_kill_source_ids(events)
         create_entities(events, realm_ids)
+
+        kill_source_ids = get_kill_source_ids(events)
 
         enter_events(events, realm_ids, kill_source_ids)
 
