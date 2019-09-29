@@ -1,9 +1,12 @@
 import React from 'react';
 import {UnitDisplay} from "../unit-display/unit-display";
+import {secondsToFormattedString} from "../../services/util";
 
 const EVENT_LIMITS = [
 	200, 500, 1000, 1500, 2000, 3000, 4000, 5000, 10000
 ];
+
+const SECONDS_BETWEEN_POSITION_EVENTS = 30;
 
 export class SourceSelect extends React.Component {
 	constructor(props) {
@@ -19,9 +22,17 @@ export class SourceSelect extends React.Component {
 	}
 
 	render() {
-		const totalEventCount = Object.values(this.props.sourcePlayerEventCount).reduce((totalCount, currentCount) => {
+		const totalEventCount = Object.values(this.props.sourcePlayerKillEventCount).reduce((totalCount, currentCount) => {
 			return totalCount + currentCount;
 		}, 0);
+
+		const totalPlayedSeconds = Object.values(this.props.sourcePlayerPositionEventCount).reduce((totalCount, currentCount) => {
+			return totalCount + (currentCount * SECONDS_BETWEEN_POSITION_EVENTS);
+		}, 0);
+
+		const totalPlayedHours = (totalPlayedSeconds / 60 / 60 / 24).toFixed(2);
+
+		const additionalData = `${totalEventCount} kill events\n${totalPlayedHours} days played`;
 
 		return (
 			<div id="source-select">
@@ -42,7 +53,7 @@ export class SourceSelect extends React.Component {
 						name={'All Realm Data'}
 						overrideImage='/img/wow-icon.svg'
 						twoColumnData={true}
-						additionalData={`${totalEventCount} kill events`}
+						additionalData={additionalData}
 						selected={this.props.selectedSourcePlayerId === null}
 					/>
 				</div>
@@ -50,7 +61,11 @@ export class SourceSelect extends React.Component {
 				{
 					this.props.sourcePlayers
 						.map(sourcePlayer => {
-							const eventCount = this.props.sourcePlayerEventCount[sourcePlayer.id] + ' kill events';
+							const positionEventCount = this.props.sourcePlayerPositionEventCount[sourcePlayer.id];
+							const totalSecondsPlayed = (positionEventCount * SECONDS_BETWEEN_POSITION_EVENTS);
+
+							const timeDisplayString = (totalSecondsPlayed / 60 / 60 / 24).toFixed(2) + ' days played';
+							const killEventDisplayString = this.props.sourcePlayerKillEventCount[sourcePlayer.id] + ' kill events';
 
 							return (
 								<div key={sourcePlayer.id} onClick={() => this.selectSourcePlayer(sourcePlayer.id)}>
@@ -60,7 +75,7 @@ export class SourceSelect extends React.Component {
 										race={sourcePlayer.race}
 										gender={sourcePlayer.gender}
 										twoColumnData={true}
-										additionalData={eventCount}
+										additionalData={killEventDisplayString + '\n' + timeDisplayString}
 										selected={this.props.selectedSourcePlayerId === sourcePlayer.id}
 									/>
 								</div>

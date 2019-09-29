@@ -6,7 +6,7 @@
   margin-top: 5px;
   margin-bottom: 5px;
 
-  &.selected {
+  &.selected, &.double-column:hover {
     background-color: lighten(@background-grey, 10%);
   }
   &:not(.selected) {
@@ -48,5 +48,6 @@
   .additional-data {
     color: white;
     font-weight: normal;
+    white-space: pre;
   }
 }

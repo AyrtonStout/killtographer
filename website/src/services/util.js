@@ -31,3 +31,10 @@ export function uuid4() {
 		return v.toString(16);
 	});
 }
+
+export function secondsToFormattedString(seconds) {
+	const days = (seconds / 60 / 60 / 24).toFixed(2);
+
+	days.toFixed(2);
+	return `${days}:${displayHours}`;
+}

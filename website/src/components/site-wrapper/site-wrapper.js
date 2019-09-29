@@ -13,7 +13,8 @@ export class SiteWrapper extends React.Component {
 			mapId: 947,
 			selectedSourcePlayerId: null,
 			sourcePlayers: [],
-			sourcePlayerEventCount: {},
+			sourcePlayerKillEventCount: {},
+			sourcePlayerPositionEventCount: {},
 			previousMapIds: [],
 			killEvents: [],
 			realms: [],
@@ -47,14 +48,25 @@ export class SiteWrapper extends React.Component {
 
 	fetchSourcePlayers(selectedRealm) {
 		Api.get('sources', { realmId: selectedRealm.id }).then(res => this.setState({ sourcePlayers: res }) );
-		Api.get('sources/event-count', { realmId: selectedRealm.id }).then(res => {
+
+		Api.get('sources/kill-event-count', { realmId: selectedRealm.id }).then(res => {
 			const playerIdToEventCount = {};
 
 			res.forEach(entry => {
 				playerIdToEventCount[entry.source_player_id] = entry.count;
 			});
 
-			this.setState({ sourcePlayerEventCount: playerIdToEventCount })
+			this.setState({ sourcePlayerKillEventCount: playerIdToEventCount })
+		});
+
+		Api.get('sources/position-event-count', { realmId: selectedRealm.id }).then(res => {
+			const playerIdToEventCount = {};
+
+			res.forEach(entry => {
+				playerIdToEventCount[entry.source_player_id] = entry.count;
+			});
+
+			this.setState({ sourcePlayerPositionEventCount: playerIdToEventCount })
 		});
 	}
 
@@ -141,7 +153,8 @@ export class SiteWrapper extends React.Component {
 				<div id="site-wrapper" className="flex-between">
 					<SourceSelect
 						sourcePlayers={this.state.sourcePlayers}
-						sourcePlayerEventCount={this.state.sourcePlayerEventCount}
+						sourcePlayerKillEventCount={this.state.sourcePlayerKillEventCount}
+						sourcePlayerPositionEventCount={this.state.sourcePlayerPositionEventCount}
 						realms={this.state.realms}
 						selectedRealm={this.state.selectedRealm}
 						updateState={this.updateState.bind(this)}
