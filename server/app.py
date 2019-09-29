@@ -3,7 +3,7 @@ import re
 from flask import Flask, jsonify, request
 from slpp import slpp as lua
 
-from data_read import read_kill_events, read_event_count, read_sources, read_realms, read_position_events
+from data_read import read_kill_events, read_kill_event_count, read_sources, read_realms, read_position_events
 from database import db, init_db
 from ingest_kills import ingest_kill_data
 from ingest_position import ingest_position_data
@@ -50,7 +50,9 @@ def get_sources():
 
 @app.route('/api/sources/event-count')
 def get_source_count():
-    return jsonify(read_event_count())
+    realm_id = request.args.get('realmId')
+
+    return jsonify(read_kill_event_count(realm_id))
 
 
 @app.route('/api/realms')

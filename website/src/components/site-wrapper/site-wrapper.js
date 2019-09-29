@@ -3,7 +3,7 @@ import {Slide, ToastContainer} from "react-toastify";
 import {Api} from "../../services/api";
 import {MapView} from "../map-view/map-view";
 import {KillFeed} from "../kill-feed/kill-feed";
-import {QuerySelect} from "../source-select/query-select";
+import {SourceSelect} from "../source-select/source-select";
 
 export class SiteWrapper extends React.Component {
 	constructor(props) {
@@ -11,7 +11,7 @@ export class SiteWrapper extends React.Component {
 
 		this.state = {
 			mapId: 947,
-			selectedSourcePlayer: null,
+			selectedSourcePlayerId: null,
 			sourcePlayers: [],
 			sourcePlayerEventCount: {},
 			previousMapIds: [],
@@ -27,25 +27,27 @@ export class SiteWrapper extends React.Component {
 	}
 
 	componentDidMount() {
+		this.fetchRealms();
 		this.fetchKillEvents(this.state.mapId);
 		this.fetchPositionEvents(this.state.mapId);
-		this.fetchSourcePlayers();
-		this.fetchRealms();
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
-			if (this.state.killEventLimit !== prevState.killEventLimit) {
-				this.fetchKillEvents(this.state.mapId);
-			} else if (this.state.positionEventLimit !== prevState.positionEventLimit) {
-				this.fetchPositionEvents(this.state.mapId);
-			} else if (this.state.selectedRealm.id !== prevState.selectedRealm.id) {
-				this.fetchSourcePlayers(this.state.selectedRealm);
-			}
+		if (this.state.killEventLimit !== prevState.killEventLimit) {
+			this.fetchKillEvents(this.state.mapId);
+		} else if (this.state.positionEventLimit !== prevState.positionEventLimit) {
+			this.fetchPositionEvents(this.state.mapId);
+		} else if (this.state.selectedRealm.id !== prevState.selectedRealm.id) {
+			this.fetchSourcePlayers(this.state.selectedRealm);
+		} else if (this.state.selectedSourcePlayerId !== prevState.selectedSourcePlayerId) {
+			this.fetchKillEvents(this.state.mapId);
+			this.fetchPositionEvents(this.state.mapId);
+		}
 	}
 
 	fetchSourcePlayers(selectedRealm) {
-		Api.get('sources').then(res => this.setState({ sourcePlayers: res }) );
-		Api.get('sources/event-count').then(res => {
+		Api.get('sources', { realmId: selectedRealm.id }).then(res => this.setState({ sourcePlayers: res }) );
+		Api.get('sources/event-count', { realmId: selectedRealm.id }).then(res => {
 			const playerIdToEventCount = {};
 
 			res.forEach(entry => {
@@ -58,7 +60,7 @@ export class SiteWrapper extends React.Component {
 
 	fetchRealms() {
 		Api.get('realms').then(realms => {
-		  // Make Grobbulus the default because Grob best realm
+			// Make Grobbulus the default because Grob best realm
 			const grobbulus = realms.find(realm => realm.name === 'Grobbulus');
 
 			let realmToSet;
@@ -81,8 +83,8 @@ export class SiteWrapper extends React.Component {
 			eventLimit: this.state.killEventLimit
 		};
 
-		if (this.state.sourcePlayerId != null) {
-			params.sourcePlayerId = this.state.selectedSourcePlayer.id
+		if (this.state.selectedSourcePlayerId != null) {
+			params.sourcePlayerId = this.state.selectedSourcePlayerId
 		}
 
 		this.setState({ killEvents: [] });
@@ -96,8 +98,8 @@ export class SiteWrapper extends React.Component {
 			eventLimit: this.state.positionEventLimit
 		};
 
-		if (this.state.sourcePlayerId != null) {
-			params.sourcePlayerId = this.state.selectedSourcePlayer.id
+		if (this.state.selectedSourcePlayerId != null) {
+			params.sourcePlayerId = this.state.selectedSourcePlayerId
 		}
 
 		this.setState({ positionEvents: [] });
@@ -121,9 +123,9 @@ export class SiteWrapper extends React.Component {
 		}
 
 		const previousMapIds = this.state.previousMapIds.slice(0);
-    const lastMapId = previousMapIds.pop();
+		const lastMapId = previousMapIds.pop();
 
-    this.setState({ mapId: lastMapId, previousMapIds, killEvents: [] });
+		this.setState({ mapId: lastMapId, previousMapIds, killEvents: [] });
 		this.fetchKillEvents(lastMapId);
 		this.fetchPositionEvents(lastMapId);
 	}
@@ -134,27 +136,33 @@ export class SiteWrapper extends React.Component {
 
 	render() {
 		return (
-			<div id="site-wrapper">
+			<div>
 				<ToastContainer autoClose={5000} hideProgressBar={true} transition={Slide}/>
-				<QuerySelect
-					sourcePlayers={this.state.sourcePlayers}
-					sourcePlayerEventCount={this.state.sourcePlayerEventCount}
-					realms={this.state.realms}
-					selectedRealm={this.state.selectedRealm}
-					updateState={this.updateState.bind(this)}
-					killsVisible={this.state.killsVisible}
-					positionsVisible={this.state.positionsVisible}
-				/>
-				<MapView
-					mapId={this.state.mapId}
-					loadMap={this.loadMap.bind(this)}
-					undoMapLoad={this.undoMapLoad.bind(this)}
-					killEvents={this.state.killEvents}
-					positionEvents={this.state.positionEvents}
-					killsVisible={this.state.killsVisible}
-					positionsVisible={this.state.positionsVisible}
-				/>
-				<KillFeed killEvents={this.state.killEvents}/>
+				<div id="site-wrapper" className="flex-between">
+					<SourceSelect
+						sourcePlayers={this.state.sourcePlayers}
+						sourcePlayerEventCount={this.state.sourcePlayerEventCount}
+						realms={this.state.realms}
+						selectedRealm={this.state.selectedRealm}
+						updateState={this.updateState.bind(this)}
+						killsVisible={this.state.killsVisible}
+						positionsVisible={this.state.positionsVisible}
+						selectedSourcePlayerId={this.state.selectedSourcePlayerId}
+					/>
+					<div>
+						<h2>KillTographer</h2>
+						<MapView
+							mapId={this.state.mapId}
+							loadMap={this.loadMap.bind(this)}
+							undoMapLoad={this.undoMapLoad.bind(this)}
+							killEvents={this.state.killEvents}
+							positionEvents={this.state.positionEvents}
+							killsVisible={this.state.killsVisible}
+							positionsVisible={this.state.positionsVisible}
+						/>
+					</div>
+					<KillFeed killEvents={this.state.killEvents}/>
+				</div>
 			</div>
 		)
 	}

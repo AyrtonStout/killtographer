@@ -63,13 +63,18 @@ def read_position_events(map_id, source_player_id, event_limit):
 
 
 def read_sources(realm_id):
-    return query_many("SELECT * FROM game_entity WHERE source_player = TRUE")
+    return query_many_params("SELECT * FROM game_entity WHERE source_player = TRUE AND realm_id = :realm_id", { 'realm_id': realm_id })
 
 
-def read_event_count():
-    return query_many("""SELECT source_player_id, count(*) as count FROM kill_event WHERE source_player_id IN (
-                      SELECT id FROM game_entity WHERE source_player = TRUE
-                      ) GROUP BY source_player_id""")
+def read_position_event_count(realm_id):
+    return query_many_params("""SELECT source_player_id, count(*) as count FROM position_event WHERE source_player_id IN (
+                      SELECT id FROM game_entity WHERE source_player = TRUE AND realm_id = :realm_id
+                      ) GROUP BY source_player_id""", { 'realm_id': realm_id })
+
+def read_kill_event_count(realm_id):
+    return query_many_params("""SELECT source_player_id, count(*) as count FROM kill_event WHERE source_player_id IN (
+                      SELECT id FROM game_entity WHERE source_player = TRUE AND realm_id = :realm_id
+                      ) GROUP BY source_player_id""", { 'realm_id': realm_id })
 
 
 def read_realms():

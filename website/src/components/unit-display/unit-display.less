@@ -3,6 +3,21 @@
   align-items: center;
   color: gold;
   font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 5px;
+
+  &.selected {
+    background-color: lighten(@background-grey, 10%);
+  }
+  &:not(.selected) {
+    cursor: pointer;
+  }
+
+  &.double-column {
+    .data-list {
+      margin-left: 10px;
+    }
+  }
 
   .player-icon {
     width: 84px;
