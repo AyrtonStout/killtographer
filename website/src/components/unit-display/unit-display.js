@@ -37,7 +37,7 @@ export class UnitDisplay extends React.Component {
 				</div>
 
 				<div className="data-list">
-					<div>{this.props.name}</div>
+					<div className="data-name">{this.props.name}</div>
 					<div className="additional-data">{this.props.additionalData}</div>
 				</div>
 			</div>

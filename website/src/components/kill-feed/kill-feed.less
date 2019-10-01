@@ -1,10 +1,23 @@
 #kill-feed {
+  flex-basis: 325px;
+  max-height: calc(100vh - 30px);
+  overflow-y: auto;
+
   .entity-section {
     display: flex;
     justify-content: space-between;
   }
 
-  flex-basis: 325px;
-  max-height: calc(100vh - 30px);
-  overflow-y: auto;
+  .kill-image {
+    margin-top: 20px;
+
+    .arrow {
+      font-size: 26px;
+      font-weight: bolder;
+    }
+
+    img {
+      width: 24px;
+    }
+  }
 }

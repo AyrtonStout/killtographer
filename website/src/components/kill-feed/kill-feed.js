@@ -19,6 +19,10 @@ export class KillFeed extends React.Component {
 								race={killEvent.killer_race}
 								gender={killEvent.killer_gender}
 							/>
+							<div className="kill-image">
+								<img src="/img/wow-skull.png"/>
+								<div className="arrow">→</div>
+							</div>
 							<UnitDisplay
 								name={killEvent.victim_name}
 								level={killEvent.victim_level}
